@@ -93,7 +93,7 @@ def analyze_repo(directory):
             if info:
                 yield info
     shutil.rmtree(directory)
-    os.rmdir(directory)
+    os.rmdir(os.path.dirname(directory))
 
 def get_users_with_n_followers(n):
     url = '/search/users?' + urllib.urlencode({'q':'followers:' + str(n)})
