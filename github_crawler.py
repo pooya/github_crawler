@@ -30,7 +30,7 @@ def wait_for_rate_limit(path, sleep_time=60):
 def get_url(path):
     buffer = StringIO()
     handle = pycurl.Curl()
-    handle.setopt(pycurl.URL, api_url + path)
+    handle.setopt(pycurl.URL, str(api_url + path))
     handle.setopt(pycurl.WRITEFUNCTION, buffer.write)
     handle.perform()
     if handle.getinfo(handle.RESPONSE_CODE) != 200:
@@ -99,7 +99,10 @@ def analyze_file(root, filename):
 def analyze_repo(directory):
     for root, dirs, files in os.walk(directory):
         for filename in files:
-            info = analyze_file(root, filename)
+            try:
+                info = analyze_file(root, filename)
+            except Exception as e:
+                print e
             if info:
                 yield info
     shutil.rmtree(directory)
