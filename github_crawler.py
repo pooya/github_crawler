@@ -15,6 +15,17 @@ api_url = "https://api.github.com"
 site_url = "https://github.com"
 url_code = getattr(pycurl, "URL")
 
+def wait_for_rate_limit(path, sleep_time=60):
+    sleep(sleep_time)
+    d = json.loads(get_url("/rate_limit")) # rate_limit is not rate_limited!
+    if d['rate']['remaining'] == 0:
+        new_sleep = sleep_time * 2
+        if new_sleep > 2 * 60 * 60:
+            raise Exception("We should never sleep for " + str(new_sleep))
+        print "sleeping for " + str(new_sleep)
+        wait_for_rate_limit(path, sleep_time * 2)
+    else:
+        return get_url(path)
 
 def get_url(path):
     buffer = StringIO()
@@ -23,8 +34,7 @@ def get_url(path):
     handle.setopt(pycurl.WRITEFUNCTION, buffer.write)
     handle.perform()
     if handle.getinfo(handle.RESPONSE_CODE) != 200:
-        sleep(120)
-        return get_url(path)
+        return wait_for_rate_limit(path)
     return buffer.getvalue()
 
 def get_followers(user):
