@@ -70,10 +70,22 @@ def get_user_parent_repos(user):
 def get_org_parent_repos(user):
     return get_parent_repos(user, get_org_repos)
 
-def clone_repo(owner, repo, branch):
+def actual_clone_repo(owner, repo, branch):
     clone_repo = site_url + "/" + owner + "/" + repo
     directory = tempfile.mkdtemp() + "/" + repo
     subprocess.check_output(["git", "clone", clone_repo, directory], stderr=subprocess.STDOUT)
+    return directory
+
+def clone_repo(owner, repo, branch):
+    # this function saves a lot of bandwidth
+    url = site_url + "/" + owner + "/" + repo + "/zipball/" + branch
+    directory = tempfile.mkdtemp() + "/"
+    zippath = directory + repo + ".zip"
+    urllib.urlretrieve(url, zippath)
+    import zipfile
+    with zipfile.ZipFile(zippath, 'r') as myzip:
+        myzip.extractall(path=directory)
+    os.unlink(zippath)
     return directory
 
 def get_gzip_size(fullfilename):
@@ -125,7 +137,7 @@ if __name__ == "__main__":
     #print get_user_parent_repos("pooya")
     #print get_user_parent_repos("discoproject")
     #directory = clone_repo("2600hz", "kazoo")
-    directory = clone_repo("talko", "plists")
+    directory = clone_repo("talko", "plists", "master")
     #analyze_repo(directory)
     #print get_random_users()
     pass
