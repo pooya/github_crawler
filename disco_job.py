@@ -8,9 +8,9 @@ def map(line, params):
     for user in users:
         repos = github_crawler.get_user_parent_repos(user)
         print str(len(repos)) + " repos"
-        for owner, repo in repos:
-            print owner + "/" + repo
-            directory = github_crawler.clone_repo(owner, repo)
+        for owner, repo, branch in repos:
+            print owner + "/" + repo + "#" + branch
+            directory = github_crawler.clone_repo(owner, repo, branch)
             for item in github_crawler.analyze_repo(directory):
                 yield item
 

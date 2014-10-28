@@ -43,25 +43,25 @@ def get_followers(user):
 
 def get_user_repos(user):
     repos = get_url("/users/" + user + "/repos")
-    return [(repo['name'], repo['fork']) for repo in json.loads(repos)]
+    return [(repo['name'], repo['default_branch'], repo['fork']) for repo in json.loads(repos)]
 
 def get_org_repos(org):
     repos = get_url("/orgs/" + org + "/repos")
-    return [(repo['name'], repo['fork']) for repo in json.loads(repos)]
+    return [(repo['name'], repo['default_branch'], repo['fork']) for repo in json.loads(repos)]
 
 def get_parent_repo(owner, repo_name):
     body = get_url("/repos/" + owner + "/" + repo_name)
     parent = json.loads(body)['parent']
-    return parent['owner']['login'], parent['name']
+    return parent['owner']['login'], parent['name'], parent['default_branch']
 
 def get_parent_repos(owner, func):
     repos = func(owner)
     parent_repos = []
-    for repo, fork in repos:
+    for repo, branch, fork in repos:
         if fork:
             parent_repos += [get_parent_repo(owner, repo)]
         else:
-            parent_repos += [(owner, repo)]
+            parent_repos += [(owner, repo, branch)]
     return parent_repos
 
 def get_user_parent_repos(user):
@@ -70,7 +70,7 @@ def get_user_parent_repos(user):
 def get_org_parent_repos(user):
     return get_parent_repos(user, get_org_repos)
 
-def clone_repo(owner, repo):
+def clone_repo(owner, repo, branch):
     clone_repo = site_url + "/" + owner + "/" + repo
     directory = tempfile.mkdtemp() + "/" + repo
     subprocess.check_output(["git", "clone", clone_repo, directory], stderr=subprocess.STDOUT)
