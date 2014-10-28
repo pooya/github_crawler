@@ -20,7 +20,7 @@ def get_url(path):
     buffer = StringIO()
     handle = pycurl.Curl()
     handle.setopt(pycurl.URL, api_url + path)
-    handle.setopt(pycurl.WRITEDATA, buffer)
+    handle.setopt(pycurl.WRITEFUNCTION, buffer.write)
     handle.perform()
     if handle.getinfo(handle.RESPONSE_CODE) != 200:
         sleep(120)
