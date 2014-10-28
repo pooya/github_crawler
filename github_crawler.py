@@ -9,6 +9,7 @@ import urllib
 from random import random
 from time import sleep
 import shutil
+import zipfile
 
 #main_url = "http://localhost:8888/"
 api_url = "https://api.github.com"
@@ -82,9 +83,12 @@ def clone_repo(owner, repo, branch):
     directory = tempfile.mkdtemp() + "/"
     zippath = directory + repo + ".zip"
     urllib.urlretrieve(url, zippath)
-    import zipfile
-    with zipfile.ZipFile(zippath, 'r') as myzip:
-        myzip.extractall(path=directory)
+    try:
+        with zipfile.ZipFile(zippath, 'r') as myzip:
+            myzip.extractall(path=directory)
+    except zipfile.BadZipfile as e:
+        # if the repo is empty, there will not be a zipfile
+        print e
     os.unlink(zippath)
     return directory
 
